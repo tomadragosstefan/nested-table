@@ -1,0 +1,87 @@
+table.collapsed tbody>tr>td{
+    display: block;
+}
+
+.table-row:hover > td, .table-row:hover > th  {
+    background-color: #EEE;/* when hovering over row */
+}
+
+.row-delete-btn{
+    margin-right: 0.3rem;
+}
+
+.row-delete-btn, .row-edit-btn{
+    visibility: hidden;
+}
+
+.table-row:hover > td > .row-delete-btn, .table-row:hover > td > .row-edit-btn {
+    visibility: visible;
+}
+
+.something-selected .table-row:hover > td > .row-delete-btn,.something-selected .table-row:hover > td > .row-edit-btn{
+    visibility: hidden;
+}
+
+.arrow-children{
+    transform: scale(1.6);
+    display: inline-block;
+}
+
+.arrow-children.open{
+    transform: scale(1.6) rotate(90deg); /* I use scale instead of font size so it will not need patching with css somewhere else */
+}
+
+.delete-multiple-btn{
+    transform: scale(1.2);
+}
+
+table .btn{
+    padding: 0.05rem 0.30rem;
+    border-radius: 3px;
+}
+
+.resizable-table .resize-handle{
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: black;
+    opacity: 0;
+    width: 6px;
+    cursor: col-resize;
+}
+
+.resizable-table thead:hover .resize-handle{
+    opacity: 0.5;
+}
+
+.resizable-table th{
+    position: relative;/* because the div which you use to resize has position absolute */
+    white-space: nowrap; /* Prevent text from wrapping to the next line */
+}
+
+.resizable-table{
+    max-width: 100%; /* Set your desired max width */
+    overflow-x: auto; /* Add horizontal scroll when table exceeds max width */
+}
+
+.resizable-table table{
+    width: 10%;/* This value is so small so I can contract the table when full screen*/
+    border-collapse: collapse; /* Merge table borders for consistent styling */
+}
+
+.resizable-table table.table-layout-fixed{
+    table-layout: fixed; /* This helps to push the columns */
+}
+
+.resizable-table td {
+    max-width: 0; /* Important for text-overflow to work */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Show ellipsis (...) if text overflows */
+    white-space: nowrap; /* Prevent text from wrapping to the next line */
+  }
+
+.infinite-scroll-container  {
+height: 1000px; /* used for infinite scrolling */
+overflow-y:visible; /* Make scrollbar visible*/
+}

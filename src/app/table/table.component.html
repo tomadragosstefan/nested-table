@@ -1,0 +1,103 @@
+<div class="container mt-5 infinite-scroll-container">
+    <h1>Nested Table Assignment</h1>
+    <div class="container mt-3" [ngClass]="{'something-selected': anyItemSelectedFlag}">
+        <div class="mb-3">
+            <input type="text" class="form-control" #searchInput placeholder="Search" id="Search" aria-label="Search input">
+        </div>
+
+        <!--Here we apply the class from the directive resizable-table and we also have infinite scroll-->
+        <div
+      infinite-scroll
+      [infiniteScrollThrottle]="throttle"
+      (scrolled)="pushMoreData()"
+      >
+            <!-- The main Table Outlet to have one entry point for data-->
+            <ng-container *ngTemplateOutlet="Table; context: { data: dataWithControls }"></ng-container>
+        </div>
+    </div>
+</div>
+
+<!------------------------------------------------------>
+<ng-template #Table let-data="data">
+    <table class="table">
+        <!-- Table Header -->
+        <ng-container *ngTemplateOutlet="TableHeader; context: { data: data }"></ng-container>
+        <tbody>
+            <!-- First Level Loop -->
+            <ng-container *ngFor="let item of data; trackBy: trackByFunctionLevel_0">
+                <!-- First Level Row -->
+                <ng-container *ngTemplateOutlet="TableItems; context: { item: item }"></ng-container>
+                <!--Recursive children-->
+                <ng-container *ngTemplateOutlet="RecursiveChildren; context: { item: item }"></ng-container>
+            </ng-container>
+        </tbody>
+    </table>
+</ng-template>    
+
+
+<!------------------------------------------------------>
+<ng-template #RecursiveChildren let-item="item" let-parentExpanded="parentExpanded">
+    <!-- Children Level 1 Loop -->
+    <ng-container *ngIf="item.children || item.level===0">
+        <!-- Nested Data Loop -->
+        <ng-container *ngFor="let children_L1_Item of item.children; trackBy: trackByFunctionLevel_1Plus">
+            <!-- Nested Data Row -->
+            <ng-container *ngTemplateOutlet="TableItems; context: { item: children_L1_Item, parentExpanded: item.expanded && parentExpanded }"></ng-container>
+            <!-- Children Level 2...n recursive -->
+            <ng-container *ngTemplateOutlet="RecursiveChildren; context: { item: children_L1_Item, parentExpanded: item.expanded && parentExpanded }"></ng-container>
+        </ng-container>
+    </ng-container>
+</ng-template>
+
+<!------------------------------------------------------>
+  <ng-template #TableHeader let-data="data">
+    <thead appResizeColumns [minWidth]="40">
+      <tr class="table-row">
+        <th scope="col">
+          <input (click)="onSelectHeaderCheckbox(data)" [checked]="headerCheckbox" type="checkbox" aria-label="Table header checkbox">
+        </th>
+        <th >Name</th>
+        <th>Type</th>
+        <th>Email</th>
+        <th>Phone Number</th>
+        <th>Company Name</th>
+        <th>
+            <button type="button" [style.visibility]="anyItemSelectedFlag?'visible':'hidden'"  class="btn text-danger delete-multiple-btn" title="Delete multiple">
+              <i class="bi bi-trash"></i>
+            </button>
+        </th>
+      </tr>
+    </thead>
+  </ng-template>
+
+<!------------------------------------------------------>
+<ng-template #TableItems let-item = "item" let-parentExpanded="parentExpanded">
+    <ng-container>
+        <tr class="table-row" [hidden]="parentExpanded === false || !item.visible">
+            
+            <td scope="col">
+                <ng-container *ngIf="item.level === 0">
+                    <input (click)="onSelectCheckbox(item)" type="checkbox" [checked]="item.selected" aria-label="Item checkbox">
+                </ng-container>
+            </td>
+            <td>
+                <div [style.marginLeft]="calculateLeftMarginForNesting(item.level)">
+                    <i (click)="onCollapseArrowSelect(item)" 
+                        [style.visibility]="item.children === undefined?'hidden':'visible'" 
+                        class="bi bi-arrow-right-short arrow-children" 
+                        [ngClass]="{'open': item.expanded}">
+                    </i>
+                    {{ item.name }}
+                </div> 
+            </td>
+            <td>{{ item.type }}</td>
+            <td>{{ item.email }}</td>
+            <td>{{ item.phoneNo }}</td>
+            <td>{{ item.companyName }}</td>
+            <td>
+                <button type="button" class="btn row-delete-btn text-danger"><i class="bi bi-x-lg" title="Delete"></i></button>
+                <button *ngIf = "item.level === 0" type="button" class="btn row-edit-btn text-warning" title="Edit"><i class="bi bi-pencil-square"></i></button>
+            </td>
+        </tr>
+    </ng-container>
+</ng-template>
