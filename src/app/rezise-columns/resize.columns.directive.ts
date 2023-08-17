@@ -7,7 +7,7 @@ export class ResizeColumnsDirective implements AfterViewInit {
     newDiv: HTMLDivElement;
     isDragging: boolean = false;
     initialX: number = 0;
-    currentTH: any;//Currently selected table head
+    currentTH!: HTMLElement;//Currently selected table head
     @Input('minWidth') minWidth: number = 0;
 
     constructor(private el: ElementRef, private renderer: Renderer2) {
@@ -78,6 +78,7 @@ export class ResizeColumnsDirective implements AfterViewInit {
 
     /*---------------------------------------------------------------*/
     /* Events on the document for enlarging the columns */
+    
     /* mousemove and touchmove */
 
     /* For deskotp device */
@@ -88,7 +89,7 @@ export class ResizeColumnsDirective implements AfterViewInit {
             const deltaX = newX - this.initialX;
             const curentWidth = this.currentTH.offsetWidth;
 
-            const newWidth = parseInt(curentWidth) + deltaX;
+            const newWidth = curentWidth + deltaX;
             if (newWidth > this.minWidth) {
                 this.currentTH.style.width = newWidth + "px";
                 this.initialX = newX;
@@ -104,7 +105,7 @@ export class ResizeColumnsDirective implements AfterViewInit {
             const deltaX = newX - this.initialX;
             const curentWidth = this.currentTH.offsetWidth;
 
-            const newWidth = parseInt(curentWidth) + deltaX;
+            const newWidth = curentWidth + deltaX;
             if (newWidth > this.minWidth) {
                 this.currentTH.style.width = newWidth + "px";
                 this.initialX = newX;

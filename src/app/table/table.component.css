@@ -1,44 +1,45 @@
-table.collapsed tbody>tr>td{
-    display: block;
-}
-
 .table-row:hover > td, .table-row:hover > th  {
     background-color: #EEE;/* when hovering over row */
 }
 
 .row-delete-btn{
-    margin-right: 0.3rem;
+    margin-right: 0.3rem; /* space between edit and delete button */
 }
 
+/* delete and edit buttons */
+
 .row-delete-btn, .row-edit-btn{
-    visibility: hidden;
+    visibility: hidden; 
 }
 
 .table-row:hover > td > .row-delete-btn, .table-row:hover > td > .row-edit-btn {
-    visibility: visible;
+    visibility: visible; /* are visible only when you hover on table row */
 }
 
 .something-selected .table-row:hover > td > .row-delete-btn,.something-selected .table-row:hover > td > .row-edit-btn{
-    visibility: hidden;
+    visibility: hidden; /* are not visible when you have something-selected class applied */
 }
 
 .arrow-children{
-    transform: scale(1.6);
+    transform: scale(1.6);/* I use scale instead of font size so it will not need patching with css somewhere else */
     display: inline-block;
 }
 
 .arrow-children.open{
-    transform: scale(1.6) rotate(90deg); /* I use scale instead of font size so it will not need patching with css somewhere else */
+    transform: scale(1.6) rotate(90deg); /* rotate arrow downoards when it`s open  */
 }
 
 .delete-multiple-btn{
-    transform: scale(1.2);
+    transform: scale(1.2); /* delete multiple button */
 }
 
+/* Make buttons smaller and more appealing */
 table .btn{
     padding: 0.05rem 0.30rem;
     border-radius: 3px;
 }
+
+/* Resizeable handle */
 
 .resizable-table .resize-handle{
     position: absolute;
@@ -52,7 +53,7 @@ table .btn{
 }
 
 .resizable-table thead:hover .resize-handle{
-    opacity: 0.5;
+    opacity: 0.5; /* resizable table header only visible on hover */
 }
 
 .resizable-table th{

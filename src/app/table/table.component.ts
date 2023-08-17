@@ -18,7 +18,7 @@ export class TableComponent implements OnInit, AfterViewInit{
   referenceArray: IDataItemWithControls[] = [];//Array that contains reference to items so we can access the parents and display and open them
   @ViewChild('searchInput', { static: false }) searchInput!: ElementRef<HTMLInputElement>;  /* HTML input used to search in table */
   searchString: string = "";//The string from the search input, needed here because we redo the search each time new data is inserted
-  throttle = 800;//delay in ms until more data is brought
+  throttle = 800;//delay in ms until more data is brought on infinite-scroll
 
   constructor(private cdr: ChangeDetectorRef) {} //Used to trigger change detection manually
 
@@ -177,16 +177,20 @@ export class TableComponent implements OnInit, AfterViewInit{
       item.visible = true;//Here we don`t need to display any parents
     else {
       item.visible = true;
-      referenceArray.forEach(refItem => {
-        if ( refItem.level <= item.level)//The level of items in the referenceArray must be lower then the matching element
-        {
-          refItem.visible = true;//make the items that are parents of the matching elements visible
-          if (refItem.children) refItem.expanded = true;//collapse all the parents of the row with the matching string 
-        }
-      })
+      this.makeParentsVisibleAndExpanded(item, referenceArray); 
     }
-
   }
+
+  makeParentsVisibleAndExpanded(item: IDataItemWithControls, referenceArray: IDataItemWithControls[]){
+    referenceArray.forEach(refItem => {
+      if ( refItem.level <= item.level)//The level of items in the referenceArray must be lower then the matching element
+      {
+        refItem.visible = true;//make the items that are parents of the matching elements visible
+        if (refItem.children) refItem.expanded = true;//collapse all the parents of the row with the matching string 
+      }
+    })
+  }
+
 
   manageReferenceArray(item: IDataItemWithControls, referenceArray: IDataItemWithControls[]){
     if (item.level === 0)
