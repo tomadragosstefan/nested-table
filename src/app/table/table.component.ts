@@ -64,11 +64,15 @@ export class TableComponent implements OnInit, AfterViewInit{
     this.setTableBodyCheckbox(item);
     this.addRemoveItemsFromCheckBoxTracker(item);
     this.updateAnyItemSelectedFlag();
+    if (item.selected === false)
+    {
+      this.headerCheckbox = false;//cancel header checkbox if one item is deselected
+    }
   }
 
-  onSelectHeaderCheckbox(item: IDataItemWithControls[]) {
-    this.headerCheckbox = this.setHeaderCheckbox(this.headerCheckbox);
-    this.setAllTableBodyCheckboxes(item, this.headerCheckbox, this.addRemoveItemsFromCheckBoxTracker.bind(this));
+  onSelectHeaderCheckbox(data: IDataItemWithControls[]) {
+    this.headerCheckbox = this.toggleHeaderCheckbox(this.headerCheckbox);
+    this.setAllTableBodyCheckboxes(data, this.headerCheckbox, this.addRemoveItemsFromCheckBoxTracker.bind(this));
     this.updateAnyItemSelectedFlag();
   }
 
@@ -103,7 +107,7 @@ export class TableComponent implements OnInit, AfterViewInit{
       });
   }
 
-  setHeaderCheckbox(headerCheckbox: boolean){
+  toggleHeaderCheckbox(headerCheckbox: boolean){
     headerCheckbox = !headerCheckbox;
     return headerCheckbox;
   }
@@ -206,6 +210,7 @@ export class TableComponent implements OnInit, AfterViewInit{
   pushMoreData(){
     this.addDataWithControls (this.data);
     this.onSearch(this.searchString, this.dataWithControls);//To keep the search when adding more data
+    this.headerCheckbox = false;//cancel header checkbox if push more data
   }
 
 

@@ -54,7 +54,7 @@ export class ResizeColumnsDirective implements AfterViewInit {
 
                 /* For mobile device */
                 newDiv.addEventListener("touchstart", (e: TouchEvent) => {
-                    e.preventDefault();
+                    //e.preventDefault();
                     this.initialX = e.touches[0].clientX;
                     //console.log("Dragging started touch");
                     this.currentTH = th;
