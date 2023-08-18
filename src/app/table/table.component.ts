@@ -61,7 +61,7 @@ export class TableComponent implements OnInit, AfterViewInit{
    /* Events */
 
   onSelectCheckbox(item: IDataItemWithControls){
-    this.setTableBodyCheckbox(item);
+    this.toggleTableBodyCheckbox(item);
     this.addRemoveItemsFromCheckBoxTracker(item);
     this.updateAnyItemSelectedFlag();
     if (item.selected === false)
@@ -94,7 +94,7 @@ export class TableComponent implements OnInit, AfterViewInit{
 /*---------------------------------------------------------------*/
   /*  Checkbox add remove operations functions */
 
-  setTableBodyCheckbox = (item: IDataItemWithControls)=>{
+  toggleTableBodyCheckbox = (item: IDataItemWithControls)=>{
     item.selected = !item.selected;
   }
 
