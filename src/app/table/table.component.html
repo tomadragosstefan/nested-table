@@ -9,7 +9,7 @@
         <div
       infinite-scroll
       [infiniteScrollThrottle]="throttle"
-      (scrolled)="pushMoreData()"
+      (scrolled)="pushData()"
       >
             <!-- The main Table Outlet to have one entry point for data-->
             <ng-container *ngTemplateOutlet="Table; context: { data: dataWithControls }"></ng-container>
@@ -54,7 +54,7 @@
     <thead appResizeColumns [minWidth]="40">
       <tr class="table-row">
         <th scope="col">
-          <input (click)="onSelectHeaderCheckbox(data)" [checked]="headerCheckbox" type="checkbox" aria-label="Table header checkbox">
+          <input (click)="onSelectHeaderCheckbox()" [checked]="headerCheckbox" type="checkbox" aria-label="Table header checkbox">
         </th>
         <th >Name</th>
         <th>Type</th>

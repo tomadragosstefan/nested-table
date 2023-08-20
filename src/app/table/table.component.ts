@@ -15,7 +15,7 @@ export class TableComponent implements OnInit, AfterViewInit{
   headerCheckbox: boolean= false;// The checkbox in the header
   checkedCheckboxes = new Set<number>()// Stores the id`s of the checkboxes to reduce calculations on the anyItemSelectedFlag
   anyItemSelectedFlag: boolean = false;// Flag which determines if we display the "Delete multiple button" or the buttons on each row
-  referenceArray: IDataItemWithControls[] = [];//Array that contains reference to items so we can access the parents and display and open them
+  parentItemsRefs: IDataItemWithControls[] = [];//Array that contains reference to items so we can access the parents and display and open them
   @ViewChild('searchInput', { static: false }) searchInput!: ElementRef<HTMLInputElement>;  /* HTML input used to search in table */
   searchString: string = "";//The string from the search input, needed here because we redo the search each time new data is inserted
   throttle = 800;//delay in ms until more data is brought on infinite-scroll
@@ -41,7 +41,7 @@ export class TableComponent implements OnInit, AfterViewInit{
         )
         .subscribe((value: string) => {
             this.searchString = value;
-            this.onSearch(value, this.dataWithControls)
+            this.onSearch(value, this.dataWithControls);
         });
     }
   }
@@ -64,15 +64,13 @@ export class TableComponent implements OnInit, AfterViewInit{
     this.toggleTableBodyCheckbox(item);
     this.addRemoveItemsFromCheckBoxTracker(item);
     this.updateAnyItemSelectedFlag();
-    if (item.selected === false)
-    {
-      this.headerCheckbox = false;//cancel header checkbox if one item is deselected
-    }
+    this.cancelHeaderCheckboxIfUnchecked(item);   
   }
 
-  onSelectHeaderCheckbox(data: IDataItemWithControls[]) {
-    this.headerCheckbox = this.toggleHeaderCheckbox(this.headerCheckbox);
-    this.setAllTableBodyCheckboxes(data, this.headerCheckbox, this.addRemoveItemsFromCheckBoxTracker.bind(this));
+
+  onSelectHeaderCheckbox() {
+    this.toggleHeaderCheckbox();
+    this.setAllTableBodyCheckboxes( this.headerCheckbox, this.addRemoveItemsFromCheckBoxTracker.bind(this));
     this.updateAnyItemSelectedFlag();
   }
 
@@ -84,9 +82,9 @@ export class TableComponent implements OnInit, AfterViewInit{
   /* It is used when searching */
   onSearch(value: string, data: IDataItemWithControls[]) {
     if (value !== "")
-      this.search(value, data, this.referenceArray);
+      this.search(value, data);
     else
-      this.resetSearch(value, data, this.referenceArray);
+      this.resetSearch(value, data);
     
     this.cdr.markForCheck();// Trigger change detection explicitly
   }
@@ -99,17 +97,23 @@ export class TableComponent implements OnInit, AfterViewInit{
   }
 
   /* This function updates the value of all the checkboxes and executes a callback for checkboxTracking */
-  setAllTableBodyCheckboxes(data: IDataItemWithControls[], value: boolean, callback: (item: IDataItemWithControls) => void){
-    data.forEach(item=>
+  setAllTableBodyCheckboxes( value: boolean, callback: (item: IDataItemWithControls) => void){
+    this.dataWithControls.forEach(item=>
       {
         item.selected = value;
         callback(item);
       });
   }
 
-  toggleHeaderCheckbox(headerCheckbox: boolean){
-    headerCheckbox = !headerCheckbox;
-    return headerCheckbox;
+  toggleHeaderCheckbox(){
+    this.headerCheckbox = !this.headerCheckbox;
+  }
+
+  cancelHeaderCheckboxIfUnchecked(item: IDataItemWithControls){
+    if (item.selected === false)
+    {
+      this.headerCheckbox = false;//cancel header checkbox if one item is deselected
+    }
   }
 
 /*---------------------------------------------------------------*/
@@ -152,42 +156,42 @@ export class TableComponent implements OnInit, AfterViewInit{
   /*Search*/
 
   /* Search in the data and in the children to display only the data from the search */
-  search(value: string, data: IDataItemWithControls[], referenceArray: IDataItemWithControls[]) {
+  search(value: string, data: IDataItemWithControls[]) {
     data.forEach((item) => {
-      if (item.name.toLowerCase().includes(value.toLowerCase())) this.makeMatchingItemsVisible(item, referenceArray);
+      if (item.name.toLowerCase().includes(value.toLowerCase())) this.makeMatchingItemsVisible(item);
       else item.visible = false;// hide unmatching items
 
       if (item.children instanceof Array) {
-        this.manageReferenceArray(item, referenceArray);
-        this.search(value, item.children, referenceArray);
+        this.manageParentItemsRefs(item);
+        this.search(value, item.children);
       }
     })
   }  
 
   /* If nothing is in the search input we make all items visible and close the expanded childrens */
-  resetSearch(value: string, data: IDataItemWithControls[], referenceArray: IDataItemWithControls[]) {
+  resetSearch(value: string, data: IDataItemWithControls[]) {
     data.forEach((item) => {
       item.visible = true;// make item visible
       if (item.children instanceof Array) {
         item.expanded = false;//close all the parents when no matches in the string
-        this.resetSearch(value, item.children, referenceArray);
+        this.resetSearch(value, item.children);
       }
     })
   }  
 
 
-  makeMatchingItemsVisible(item: IDataItemWithControls, referenceArray: IDataItemWithControls[]) {
+  makeMatchingItemsVisible(item: IDataItemWithControls) {
     if (item.level === 0)
       item.visible = true;//Here we don`t need to display any parents
     else {
       item.visible = true;
-      this.makeParentsVisibleAndExpanded(item, referenceArray); 
+      this.makeParentsVisibleAndExpanded(item); 
     }
   }
 
-  makeParentsVisibleAndExpanded(item: IDataItemWithControls, referenceArray: IDataItemWithControls[]){
-    referenceArray.forEach(refItem => {
-      if ( refItem.level <= item.level)//The level of items in the referenceArray must be lower then the matching element
+  makeParentsVisibleAndExpanded(item: IDataItemWithControls){
+    this.parentItemsRefs.forEach(refItem => {
+      if ( refItem.level <= item.level)//The level of items in the parentItemsRefs must be lower then the matching element
       {
         refItem.visible = true;//make the items that are parents of the matching elements visible
         if (refItem.children) refItem.expanded = true;//collapse all the parents of the row with the matching string 
@@ -196,18 +200,18 @@ export class TableComponent implements OnInit, AfterViewInit{
   }
 
 
-  manageReferenceArray(item: IDataItemWithControls, referenceArray: IDataItemWithControls[]){
+  manageParentItemsRefs(item: IDataItemWithControls){
     if (item.level === 0)
     {
-      referenceArray.length = 0;//If we are at level 0 we empty the referenceArray
+      this.parentItemsRefs.length = 0;//If we are at level 0 we empty the parentItemsRefs
     }
-    referenceArray.push(item);//For each level we push the items into the array
+    this.parentItemsRefs.push(item);//For each level we push the items into the array
   }
 
 /*---------------------------------------------------------------*/
   /* Push more data */
 
-  pushMoreData(){
+  pushData(){
     this.addDataWithControls (this.data);
     this.onSearch(this.searchString, this.dataWithControls);//To keep the search when adding more data
     this.headerCheckbox = false;//cancel header checkbox if push more data
