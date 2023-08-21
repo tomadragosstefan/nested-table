@@ -199,7 +199,7 @@ export class TableComponent implements OnInit, AfterViewInit{
     })
   }
 
-
+  /* Function used to store the parents, so you can ecpand them when finding a match */
   manageParentItemsRefs(item: IDataItemWithControls){
     if (item.level === 0)
     {
