@@ -36,7 +36,6 @@ export class ResizeColumnsDirective implements AfterViewInit {
                 // Create a new div that you will use to resize the column
                 const newDiv = this.renderer.createElement('div');
 
-                // Add class
                 this.renderer.addClass(newDiv, 'resize-handle');//This class is to add style to the new div in the component
 
                 /*---------------------------------------------------------------*/
@@ -45,21 +44,20 @@ export class ResizeColumnsDirective implements AfterViewInit {
 
                 /* For deskotp device */
                 newDiv.addEventListener("mousedown", (e: MouseEvent) => {
-                    e.preventDefault();
-                    this.initialX = e.clientX;
-                    //console.log("Dragging started mouse");
-                    this.currentTH = th;
-                    this.isDragging = true;
+                    mouseDownTouchStart(e);
                 });
 
                 /* For mobile device */
                 newDiv.addEventListener("touchstart", (e: TouchEvent) => {
-                    //e.preventDefault();
-                    this.initialX = e.touches[0].clientX;
-                    //console.log("Dragging started touch");
+                    mouseDownTouchStart(e);
+                });
+
+                const mouseDownTouchStart = (e: MouseEvent | TouchEvent)=>{
+                    if(e instanceof MouseEvent) e.preventDefault();
+                    this.initialX = (e instanceof MouseEvent)?e.clientX:e.touches[0].clientX;
                     this.currentTH = th;
                     this.isDragging = true;
-                });
+                }
 
                 /*---------------------------------------------------------------*/
 
@@ -81,52 +79,30 @@ export class ResizeColumnsDirective implements AfterViewInit {
     
     /* mousemove and touchmove */
 
-    /* For deskotp device */
     @HostListener('document:mousemove', ['$event'])
-    onMousemove(e: MouseEvent): void {
-        if (this.isDragging === true) {
-            const newX = e.clientX;
-            const deltaX = newX - this.initialX;
-            const curentWidth = this.currentTH.offsetWidth;
-
-            const newWidth = curentWidth + deltaX;
-            if (newWidth > this.minWidth) {
-                this.currentTH.style.width = newWidth + "px";
-                this.initialX = newX;
-            }
-        }
-    }
-
-    /* For mobile device */
     @HostListener('document:touchmove', ['$event'])
-    onTouchmove(e: TouchEvent): void {
-        if (this.isDragging === true) {
-            const newX = e.touches[0].clientX
-            const deltaX = newX - this.initialX;
-            const curentWidth = this.currentTH.offsetWidth;
-
-            const newWidth = curentWidth + deltaX;
+    onResize(e: MouseEvent | TouchEvent): void {
+        if (this.isDragging) {
+            const clientX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX;
+            const deltaX = clientX - this.initialX;
+            const currentWidth = this.currentTH.offsetWidth;
+    
+            const newWidth = currentWidth + deltaX;
             if (newWidth > this.minWidth) {
-                this.currentTH.style.width = newWidth + "px";
-                this.initialX = newX;
+                this.currentTH.style.width = newWidth + 'px';
+                this.initialX = clientX;
             }
         }
     }
+    
 
     /* mouseup and touchend */
 
     /* For deskotp device */
     @HostListener('document:mouseup', ['$event'])
-    onMouseup(event: MouseEvent): void {
-        this.isDragging = false;
-        //console.log('Mouse up outside the element');
-    }
-
-    /* For mobile device */
     @HostListener('document:touchend', ['$event'])
-    onTouchend(event: TouchEvent): void {
+    onFinishResize(): void {
         this.isDragging = false;
-        //console.log('Touch up outside the element');
     }
 
 }
