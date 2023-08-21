@@ -4,15 +4,13 @@ import { AfterViewInit, Directive, ElementRef, HostBinding, HostListener, Input,
     selector: "[appResizeColumns]"
 })
 export class ResizeColumnsDirective implements AfterViewInit {
-    newDiv: HTMLDivElement;
-    isDragging: boolean = false;
-    initialX: number = 0;
+    isDragging: boolean = false;//This is true while dragging
+    initialX: number = 0;//Initiatedwhen dragging started
     currentTH!: HTMLElement;//Currently selected table head
-    @Input('minWidth') minWidth: number = 0;
+    @Input('minWidth') minWidth: number = 0;//minWidth that comes from outside
 
     constructor(private el: ElementRef, private renderer: Renderer2) {
-        // Create a new div that we will use to resize the column
-        this.newDiv = this.renderer.createElement('div');
+
     }
 
     ngAfterViewInit() {
@@ -78,7 +76,6 @@ export class ResizeColumnsDirective implements AfterViewInit {
     /* Events on the document for enlarging the columns */
     
     /* mousemove and touchmove */
-
     @HostListener('document:mousemove', ['$event'])
     @HostListener('document:touchmove', ['$event'])
     onResize(e: MouseEvent | TouchEvent): void {
@@ -95,10 +92,7 @@ export class ResizeColumnsDirective implements AfterViewInit {
         }
     }
     
-
     /* mouseup and touchend */
-
-    /* For deskotp device */
     @HostListener('document:mouseup', ['$event'])
     @HostListener('document:touchend', ['$event'])
     onFinishResize(): void {
