@@ -5,13 +5,11 @@ import { AfterViewInit, Directive, ElementRef, HostBinding, HostListener, Input,
 })
 export class ResizeColumnsDirective implements AfterViewInit {
     isDragging: boolean = false;//This is true while dragging
-    initialX: number = 0;//Initiatedwhen dragging started
+    initialX: number = 0;//Initiated when dragging started
     currentTH!: HTMLElement;//Currently selected table head
     @Input('minWidth') minWidth: number = 0;//minWidth that comes from outside
 
-    constructor(private el: ElementRef, private renderer: Renderer2) {
-
-    }
+    constructor(private el: ElementRef, private renderer: Renderer2) {}
 
     ngAfterViewInit() {
 
