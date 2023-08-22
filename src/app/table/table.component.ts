@@ -190,13 +190,16 @@ export class TableComponent implements OnInit, AfterViewInit{
   }
 
   makeParentsVisibleAndExpanded(item: IDataItemWithControls){
+    const unusedParentItems: IDataItemWithControls[] = [];//We use this to store the refs that where not used in the search, so if later we go to a lower level we don`t revisit the previous nodes
     this.parentItemsRefs.forEach(refItem => {
       if ( refItem.level <= item.level)//The level of items in the parentItemsRefs must be lower then the matching element
       {
-        refItem.visible = true;//make the items that are parents of the matching elements visible
-        if (refItem.children) refItem.expanded = true;//collapse all the parents of the row with the matching string 
-      }
+        refItem.visible = true;//Make parent items visible for the matching element
+        if (refItem.children) refItem.expanded = true;//Expand parents of the matching row
+      } else unusedParentItems.push(refItem);
     })
+    this.parentItemsRefs.length = 0;//Clear previous references
+    this.parentItemsRefs = unusedParentItems;//Keep unused references
   }
 
   /* Function used to store the parents, so you can ecpand them when finding a match */
