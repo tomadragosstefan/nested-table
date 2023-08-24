@@ -1,5 +1,5 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { debounceTime, fromEvent, map } from 'rxjs';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Subscription, debounceTime, fromEvent, map } from 'rxjs';
 import { IDataItem, IDataItemWithControls } from './IDataItem.interface';
 import { DataItemWithControls } from './data-item-with-controls.model'
 
@@ -9,7 +9,7 @@ import { DataItemWithControls } from './data-item-with-controls.model'
   styleUrls: ['./table.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush, // Change the strategy for reducing change detection cycles
 })
-export class TableComponent implements OnInit, AfterViewInit{
+export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
   @Input('data') data: IDataItem[] = [];
   dataWithControls: IDataItemWithControls[] = [];// The object that stores all the data from the table (and has controls added to it)
   headerCheckbox: boolean= false;// The checkbox in the header
@@ -18,6 +18,7 @@ export class TableComponent implements OnInit, AfterViewInit{
   parentItemsRefs: IDataItemWithControls[] = [];//Array that contains reference to items so we can access the parents and display and open them
   @ViewChild('searchInput', { static: false }) searchInput!: ElementRef<HTMLInputElement>;  /* HTML input used to search in table */
   searchString: string = "";//The string from the search input, needed here because we redo the search each time new data is inserted
+  searchSubscription: Subscription | null = null;
   throttle = 800;//delay in ms until more data is brought on infinite-scroll
 
   constructor(private cdr: ChangeDetectorRef) {} //Used to trigger change detection manually
@@ -31,19 +32,17 @@ export class TableComponent implements OnInit, AfterViewInit{
   /* Search event */  
 
   ngAfterViewInit() {
-    if (this.searchInput) {
-      const inputEvent = fromEvent(this.searchInput.nativeElement, 'input');
+    const inputEvent = fromEvent(this.searchInput.nativeElement, 'input');
 
-      inputEvent
-        .pipe(
-          debounceTime(1000), // Debounce time
-          map((event: Event) => (event.target as HTMLInputElement).value)
-        )
-        .subscribe((value: string) => {
-            this.searchString = value;
-            this.onSearch(value, this.dataWithControls);
-        });
-    }
+    this.searchSubscription = inputEvent
+      .pipe(
+        debounceTime(1000), // Debounce time
+        map((event: Event) => (event.target as HTMLInputElement).value)
+      )
+      .subscribe((value: string) => {
+          this.searchString = value;
+          this.onSearch(value, this.dataWithControls);
+      });
   }
   
 /*---------------------------------------------------------------*/
@@ -220,5 +219,9 @@ export class TableComponent implements OnInit, AfterViewInit{
     this.headerCheckbox = false;//cancel header checkbox if push more data
   }
 
+
+  ngOnDestroy(): void {
+    this.searchSubscription?.unsubscribe();
+  }
 
 }
