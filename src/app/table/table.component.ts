@@ -15,7 +15,7 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
   headerCheckbox: boolean= false;// The checkbox in the header
   checkedCheckboxes = new Set<number>()// Stores the id`s of the checkboxes to reduce calculations on the anyItemSelectedFlag
   anyItemSelectedFlag: boolean = false;// Flag which determines if we display the "Delete multiple button" or the buttons on each row
-  parentItemsRefs: IDataItemWithControls[] = [];//Array that contains reference to items so we can access the parents and display and open them
+  parentItemsRefs: Set <IDataItemWithControls> = new Set();//Array that contains reference to items so we can access the parents and display and open them
   @ViewChild('searchInput', { static: false }) searchInput!: ElementRef<HTMLInputElement>;  /* HTML input used to search in table */
   searchString: string = "";//The string from the search input, needed here because we redo the search each time new data is inserted
   searchSubscription: Subscription | null = null;
@@ -189,15 +189,15 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
   }
 
   makeParentsVisibleAndExpanded(item: IDataItemWithControls){
-    const unusedParentItems: IDataItemWithControls[] = [];//We use this to store the refs that where not used in the search, so if later we go to a lower level we don`t revisit the previous nodes
+    const unusedParentItems: Set<IDataItemWithControls> = new Set();//We use this to store the refs that where not used in the search, so if later we go to a lower level we don`t revisit the previous nodes
     this.parentItemsRefs.forEach(refItem => {
       if ( refItem.level <= item.level)//The level of items in the parentItemsRefs must be lower then the matching element
       {
         refItem.visible = true;//Make parent items visible for the matching element
         if (refItem.children) refItem.expanded = true;//Expand parents of the matching row
-      } else unusedParentItems.push(refItem);
+      } else unusedParentItems.add(refItem);
     })
-    this.parentItemsRefs.length = 0;//Clear previous references
+    this.parentItemsRefs.clear();//Clear previous references
     this.parentItemsRefs = unusedParentItems;//Keep unused references
   }
 
@@ -205,9 +205,9 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
   manageParentItemsRefs(item: IDataItemWithControls){
     if (item.level === 0)
     {
-      this.parentItemsRefs.length = 0;//If we are at level 0 we empty the parentItemsRefs
+      this.parentItemsRefs.clear();//If we are at level 0 we empty the parentItemsRefs
     }
-    this.parentItemsRefs.push(item);//For each level we push the items into the array
+    this.parentItemsRefs.add(item);//For each level we push the items into the array
   }
 
 /*---------------------------------------------------------------*/
