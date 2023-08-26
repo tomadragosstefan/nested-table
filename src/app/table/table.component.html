@@ -24,7 +24,7 @@
         <ng-container *ngTemplateOutlet="TableHeader; context: { data: data }"></ng-container>
         <tbody>
             <!-- First Level Loop -->
-            <ng-container *ngFor="let item of data; trackBy: trackByFunctionLevel_0">
+            <ng-container *ngFor="let item of data; trackBy: trackByFunctionDataItems">
                 <!-- First Level Row -->
                 <ng-container *ngTemplateOutlet="TableItems; context: { item: item }"></ng-container>
                 <!--Recursive children-->
@@ -40,7 +40,7 @@
     <!-- Children Level 1 Loop -->
     <ng-container *ngIf="item.children || item.level===0">
         <!-- Nested Data Loop -->
-        <ng-container *ngFor="let children_L1_Item of item.children; trackBy: trackByFunctionLevel_1Plus">
+        <ng-container *ngFor="let children_L1_Item of item.children; trackBy: trackByFunctionDataItems">
             <!-- Nested Data Row -->
             <ng-container *ngTemplateOutlet="TableItems; context: { item: children_L1_Item, parentExpanded: item.expanded && parentExpanded }"></ng-container>
             <!-- Children Level 2...n recursive -->
