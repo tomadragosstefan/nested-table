@@ -35,4 +35,14 @@ export class DataItemWithControls implements IDataItemWithControls {
         }
     }
 
+/*---------------------------------------------------------------*/
+    /* Add controls */
+    static add = (data: IDataItem[], dataWithControls: DataItemWithControls[]) => {
+        data.forEach((item: IDataItem) => {
+            const newItemWithControls: DataItemWithControls = new DataItemWithControls(item);
+            dataWithControls.push(newItemWithControls);
+        }
+        );
+    }
+
 }

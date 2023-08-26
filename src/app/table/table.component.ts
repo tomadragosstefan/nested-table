@@ -2,18 +2,19 @@ import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, E
 import { Subscription, debounceTime, fromEvent, map } from 'rxjs';
 import { IDataItem, IDataItemWithControls } from './IDataItem.interface';
 import { DataItemWithControls } from './data-item-with-controls.model'
+import { CheckboxService } from './checkbox.service';
 
 @Component({
   selector: 'table-component',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush, // Change the strategy for reducing change detection cycles
+  providers: [CheckboxService]
 })
 export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
   @Input('data') data: IDataItem[] = [];
   dataWithControls: IDataItemWithControls[] = [];// The object that stores all the data from the table (and has controls added to it)
   headerCheckbox: boolean= false;// The checkbox in the header
-  checkedCheckboxes = new Set<number>()// Stores the id`s of the checkboxes to reduce calculations on the anyItemSelectedFlag
   anyItemSelectedFlag: boolean = false;// Flag which determines if we display the "Delete multiple button" or the buttons on each row
   parentItemsRefs: Set <IDataItemWithControls> = new Set();//Array that contains reference to items so we can access the parents and display and open them
   @ViewChild('searchInput', { static: false }) searchInput!: ElementRef<HTMLInputElement>;  /* HTML input used to search in table */
@@ -21,11 +22,11 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
   searchSubscription: Subscription | null = null;
   throttle = 800;//delay in ms until more data is brought on infinite-scroll
 
-  constructor(private cdr: ChangeDetectorRef) {} //Used to trigger change detection manually
+  constructor(private cdr: ChangeDetectorRef, private checkboxService: CheckboxService) {} //Used to trigger change detection manually
 
   ngOnInit() {
     //Push initial data
-    this.addDataWithControls (this.data);
+    DataItemWithControls.add(this.data,this.dataWithControls);
   }
 
  /*---------------------------------------------------------------*/
@@ -46,31 +47,19 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
   }
   
 /*---------------------------------------------------------------*/
-  /* Add controls */ 
-    
-  addDataWithControls = (data: IDataItem[]) => {
-    data.forEach((item: IDataItem) => {
-      const newItemWithControls: IDataItemWithControls = new DataItemWithControls(item);
-      this.dataWithControls.push(newItemWithControls);
-    }
-    );
-  }
-
-/*---------------------------------------------------------------*/
    /* Events */
 
   onSelectCheckbox(item: IDataItemWithControls){
-    this.toggleTableBodyCheckbox(item);
-    this.addRemoveItemsFromCheckBoxTracker(item);
-    this.updateAnyItemSelectedFlag();
-    this.cancelHeaderCheckboxIfUnchecked(item);   
+    this.checkboxService.toggleTableBodyCheckbox(item);
+    this.checkboxService.updateCheckBoxTracker(item);
+    this.anyItemSelectedFlag = this.checkboxService.updateAnyItemSelectedFlag();
+    this.headerCheckbox = this.checkboxService.cancelHeaderCheckboxIfUnchecked(item, this.headerCheckbox);   
   }
 
-
   onSelectHeaderCheckbox() {
-    this.toggleHeaderCheckbox();
-    this.setAllTableBodyCheckboxes( this.headerCheckbox, this.addRemoveItemsFromCheckBoxTracker.bind(this));
-    this.updateAnyItemSelectedFlag();
+    this.headerCheckbox = this.checkboxService.toggleHeaderCheckbox(this.headerCheckbox);
+    this.checkboxService.setAllTableBodyCheckboxes( this.headerCheckbox, this.dataWithControls, this.checkboxService.updateCheckBoxTracker.bind(this.checkboxService));
+    this.anyItemSelectedFlag = this.checkboxService.updateAnyItemSelectedFlag();
   }
 
   /* It is used when you click an arrow, and it toggles the children in the table */
@@ -88,52 +77,9 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
     this.cdr.markForCheck();// Trigger change detection explicitly
   }
 
-/*---------------------------------------------------------------*/
-  /*  Checkbox add remove operations functions */
 
-  toggleTableBodyCheckbox = (item: IDataItemWithControls)=>{
-    item.selected = !item.selected;
-  }
 
-  /* This function updates the value of all the checkboxes and executes a callback for checkboxTracking */
-  setAllTableBodyCheckboxes( value: boolean, callback: (item: IDataItemWithControls) => void){
-    this.dataWithControls.forEach(item=>
-      {
-        item.selected = value;
-        callback(item);
-      });
-  }
 
-  toggleHeaderCheckbox(){
-    this.headerCheckbox = !this.headerCheckbox;
-  }
-
-  cancelHeaderCheckboxIfUnchecked(item: IDataItemWithControls){
-    if (item.selected === false)
-    {
-      this.headerCheckbox = false;//cancel header checkbox if one item is deselected
-    }
-  }
-
-/*---------------------------------------------------------------*/
-/* Track checkbox selection functions */
-
-  /* Track selected checkboxes */
-  addRemoveItemsFromCheckBoxTracker(item: IDataItemWithControls) {
-      if (item.selected === true) {
-        this.checkedCheckboxes.add(item.id);
-      } else {
-        this.checkedCheckboxes.delete(item.id);
-      }
-  }
-
-/**
- *  Updates the 'anyItemSelectedFlag' flag based on the presence of checked checkboxes
- *  after adding or removing checkbox operations.
- */
-  updateAnyItemSelectedFlag(){
-    this.anyItemSelectedFlag = this.checkedCheckboxes.size > 0;  
-  }
 /*---------------------------------------------------------------*/
   /* Calculates the left margin based on nesting level */
   calculateLeftMarginForNesting(level: number){
@@ -178,7 +124,6 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
     })
   }  
 
-
   makeMatchingItemsVisible(item: IDataItemWithControls) {
     if (item.level === 0)
       item.visible = true;//Here we don`t need to display any parents
@@ -214,7 +159,7 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
   /* Push more data */
 
   pushData(){
-    this.addDataWithControls (this.data);
+    DataItemWithControls.add(this.data, this.dataWithControls);
     this.onSearch(this.searchString, this.dataWithControls);//To keep the search when adding more data
     this.headerCheckbox = false;//cancel header checkbox if push more data
   }
