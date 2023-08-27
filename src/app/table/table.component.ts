@@ -54,7 +54,7 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
     item.selected = !item.selected;//toggle current checkbox
     this.checkboxService.updateCheckBoxTracker(item);
     this.anyItemSelectedFlag = this.checkboxService.updateAnyItemSelectedFlag();
-    this.headerCheckbox = this.checkboxService.cancelHeaderCheckboxIfUnchecked(item, this.headerCheckbox);   
+    if (item.selected === false) this.headerCheckbox = false; //Cancel header checkbox if one item is deselected 
   }
 
   onSelectHeaderCheckbox() {
