@@ -49,7 +49,7 @@ export class TableSearchService {
         }
     }
 
-    /* Function used to store the parents, so you can ecpand them when finding a match */
+    /* Function used to store the parents, so you can expand them when finding a match */
     manageParentItemsRefs(item: DataItemWithControls) {
         if (item.level === 0) {
             this.parentItemsRefs.clear();//If we are at level 0 we empty the parentItemsRefs
