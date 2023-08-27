@@ -51,15 +51,18 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
    /* Events */
 
   onSelectCheckbox(item: DataItemWithControls){
-    this.checkboxService.toggleTableBodyCheckbox(item);
+    item.selected = !item.selected;//toggle current checkbox
     this.checkboxService.updateCheckBoxTracker(item);
     this.anyItemSelectedFlag = this.checkboxService.updateAnyItemSelectedFlag();
     this.headerCheckbox = this.checkboxService.cancelHeaderCheckboxIfUnchecked(item, this.headerCheckbox);   
   }
 
   onSelectHeaderCheckbox() {
-    this.headerCheckbox = this.checkboxService.toggleHeaderCheckbox(this.headerCheckbox);
-    this.checkboxService.setAllTableBodyCheckboxes( this.headerCheckbox, this.dataWithControls, this.checkboxService.updateCheckBoxTracker.bind(this.checkboxService));
+    this.headerCheckbox = !this.headerCheckbox;//toggle header checkbox
+    this.dataWithControls.forEach(item => {
+      item.selected = this.headerCheckbox;
+      this.checkboxService.updateCheckBoxTracker(item);
+    });
     this.anyItemSelectedFlag = this.checkboxService.updateAnyItemSelectedFlag();
   }
 
