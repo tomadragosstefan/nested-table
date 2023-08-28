@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, E
 import { Subscription, debounceTime, fromEvent, map } from 'rxjs';
 import { IDataItem } from './IDataItem.interface';
 import { DataItemWithControls } from './data-item-with-controls.model'
-import { TableCheckboxService } from './table.checkbox.service';
+import { TableCheckboxTrackerService } from './table-checkbox-tracker.service';
 import { TableSearchService } from './table.search.service';
 
 @Component({
@@ -10,7 +10,7 @@ import { TableSearchService } from './table.search.service';
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush, // Change the strategy for reducing change detection cycles
-  providers: [TableCheckboxService, TableSearchService]
+  providers: [TableCheckboxTrackerService, TableSearchService]
 })
 export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
   @Input('data') data: IDataItem[] = [];
@@ -23,7 +23,7 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
   searchSubscription: Subscription | null = null;
   throttle = 800;//delay in ms until more data is brought on infinite-scroll
 
-  constructor(private cdr: ChangeDetectorRef, private checkboxService: TableCheckboxService, private searchService : TableSearchService) {} //Used to trigger change detection manually
+  constructor(private cdr: ChangeDetectorRef, private checkboxTrackerService: TableCheckboxTrackerService, private searchService : TableSearchService) {} //Used to trigger change detection manually
 
   ngOnInit() {
     //Push initial data
@@ -52,8 +52,8 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
 
   onSelectCheckbox(item: DataItemWithControls){
     item.selected = !item.selected;//toggle current checkbox
-    this.checkboxService.updateCheckBoxTracker(item);
-    this.anyItemSelectedFlag = this.checkboxService.updateAnyItemSelectedFlag();
+    this.checkboxTrackerService.updateCheckBoxTracker(item);
+    this.anyItemSelectedFlag = this.checkboxTrackerService.updateAnyItemSelectedFlag();
     if (item.selected === false) this.headerCheckbox = false; //Cancel header checkbox if one item is deselected 
   }
 
@@ -61,9 +61,9 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
     this.headerCheckbox = !this.headerCheckbox;//toggle header checkbox
     this.dataWithControls.forEach(item => {
       item.selected = this.headerCheckbox;
-      this.checkboxService.updateCheckBoxTracker(item);
+      this.checkboxTrackerService.updateCheckBoxTracker(item);
     });
-    this.anyItemSelectedFlag = this.checkboxService.updateAnyItemSelectedFlag();
+    this.anyItemSelectedFlag = this.checkboxTrackerService.updateAnyItemSelectedFlag();
   }
 
   /* It is used when you click an arrow, and it toggles the children in the table */

@@ -7,7 +7,7 @@ export class TableSearchService {
     /* Search in the data and in the children to display only the data from the search */
     search(value: string, data: DataItemWithControls[]) {
         data.forEach((item) => {
-            if (item.name.toLowerCase().includes(value.toLowerCase())) this.makeMatchingItemsVisible(item);
+            if (item.name.toLowerCase().includes(value.toLowerCase())) this.makeMatchingItemVisible(item);
             else item.visible = false;// hide unmatching items
 
             if (item.children instanceof Array) {
@@ -28,13 +28,13 @@ export class TableSearchService {
         })
     }
 
-    makeMatchingItemsVisible(item: DataItemWithControls) {
-        if (item.level === 0)
-            item.visible = true;//Here we don`t need to display any parents
-        else {
+    makeMatchingItemVisible(item: DataItemWithControls) {
+        item.visible = true;//At level 0 we don`t need to display any parents
+        if (item.level > 0) {
             item.visible = true;
             this.makeParentsVisibleAndExpanded(item);
         }
+        item.expanded = false;//to close this row when doing the search again withour a reset
     }
 
     makeParentsVisibleAndExpanded(item: DataItemWithControls) {

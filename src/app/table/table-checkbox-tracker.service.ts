@@ -1,7 +1,7 @@
 import { DataItemWithControls } from "./data-item-with-controls.model";
 
 
-export class TableCheckboxService {
+export class TableCheckboxTrackerService {
 
     private checkedCheckboxes = new Set<number>()// Stores the id`s of the checkboxes to reduce calculations on the anyItemSelectedFlag
     /*---------------------------------------------------------------*/
