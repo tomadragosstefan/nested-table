@@ -1,3 +1,4 @@
+import * as lodash from "lodash";
 import { DataItemWithControls } from "./data-item-with-controls.model";
 
 export class TableSearchService {
@@ -6,24 +7,36 @@ export class TableSearchService {
 
     /* Search in the data and in the children to display only the data from the search */
     search(value: string, data: DataItemWithControls[]) {
+        const dataCopy = lodash.cloneDeep(data);
+        this.searchRecursive(value, dataCopy);
+        return dataCopy;
+    }
+
+    private searchRecursive(value: string, data: DataItemWithControls[]) {
         data.forEach((item) => {
             if (item.name.toLowerCase().includes(value.toLowerCase())) this.makeMatchingItemVisible(item);
             else item.visible = false;// hide unmatching items
 
             if (item.children instanceof Array) {
                 this.manageParentItemsRefs(item);
-                this.search(value, item.children);
+                this.searchRecursive(value, item.children);
             }
         })
     }
 
     /* If nothing is in the search input we make all items visible and close the expanded childrens */
     resetSearch(value: string, data: DataItemWithControls[]) {
+        const dataCopy = lodash.cloneDeep(data);
+        this.resetSearchRecursive(value, dataCopy);
+        return dataCopy;
+    }
+
+    private resetSearchRecursive(value: string, data: DataItemWithControls[]) {
         data.forEach((item) => {
             item.visible = true;// make item visible
             if (item.children instanceof Array) {
                 item.expanded = false;//close all the parents when no matches in the string
-                this.resetSearch(value, item.children);
+                this.resetSearchRecursive(value, item.children);
             }
         })
     }

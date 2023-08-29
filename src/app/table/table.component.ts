@@ -43,7 +43,7 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
       )
       .subscribe((value: string) => {
           this.searchString = value;
-          this.onSearch(value, this.dataWithControls);
+          this.onSearch(value);
       });
   }
   
@@ -72,12 +72,11 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
   }
   
   /* It is used when searching */
-  onSearch(value: string, data: DataItemWithControls[]) {
+  onSearch(value: string) {
     if (value !== "")
-      this.searchService.search(value, data);
+      this.dataWithControls = this.searchService.search(value, this.dataWithControls);
     else
-      this.searchService.resetSearch(value, data);
-    
+      this.dataWithControls = this.searchService.resetSearch(value, this.dataWithControls);
     this.cdr.markForCheck();// Trigger change detection explicitly
   }
 /*---------------------------------------------------------------*/
@@ -97,7 +96,7 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
 
   pushData(){
     DataItemWithControls.add(this.data, this.dataWithControls);
-    this.onSearch(this.searchString, this.dataWithControls);//To keep the search when adding more data
+    this.onSearch(this.searchString);//To keep the search when adding more data
     this.headerCheckbox = false;//cancel header checkbox if push more data
   }
 
