@@ -43,7 +43,7 @@ export class TableComponent implements OnInit, AfterViewInit, OnDestroy{
       )
       .subscribe((value: string) => {
           this.searchString = value;
-          this.onSearch(value);
+          this.onSearch(this.searchString);
       });
   }
   
